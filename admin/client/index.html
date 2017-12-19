@@ -95,11 +95,7 @@
                     }
                     
                     data.append(
-                        "pub", JSON.stringify(pubdata)
-                    );
-                    
-                    data.append(
-                        "prv", JSON.stringify(prvdata)
+                        "data", JSON.stringify({"pub" : pubdata, "prv": prvdata})
                     );
                     
                     $.ajax({
