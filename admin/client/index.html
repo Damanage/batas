@@ -8,6 +8,22 @@
  
         <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
         <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="https://api-maps.yandex.ru/2.1/?lang=ru-RU"></script>
+        <style>
+            html, body, #map {
+                width: 100%; height: 100%; padding: 0; margin: 0;
+            }
+            a {
+                color: #04b; /* Цвет ссылки */
+                text-decoration: none; /* Убираем подчеркивание у ссылок */
+            }
+            a:visited {
+                color: #04b; /* Цвет посещённой ссылки */
+            }
+            a:hover {
+                color: #f50000; /* Цвет ссылки при наведении на нее курсора мыши */
+            }
+        </style>
         
         <script type="text/javascript">
             $(document).ready(function() {
@@ -21,21 +37,21 @@
                         }
                     }),
                     "columns": [
-                        { "data": "pub.id" },
-                        { "data": "pub.product" },
-                        { "data": "pub.price" },
-                        { "data": "pub.currency" },
-                        { "data": "pub.fromdate" },
-                        { "data": "pub.status" },
-                        { "data": "pub.comments" },
-                        { "data": "pub.geo.0"},
-                        { "data": "pub.geo.1"},
+                        { "data": "pub._id" },
+                        { "data": "pub.properties.product" },
+                        { "data": "pub.properties.price" },
+                        { "data": "pub.properties.currency" },
+                        { "data": "pub.properties.fromdate" },
+                        { "data": "pub.properties.status" },
+                        { "data": "pub.properties.comments" },
+                        { "data": "pub.geometry.coordinates.1"},
+                        { "data": "pub.geometry.coordinates.0"},
                         { "data": "prv.desc" },
                         { "data": "prv.links" },
                         { "data": "prv.notes" },
                         { "data": null, "defaultContent": "<button>Edit!</button>"},
-                        { "data": "pub.rev"},
-                        { "data": "prv.rev"}
+                        { "data": "pub._rev"},
+                        { "data": "prv._rev"}
                     ]
                 });
                 
@@ -66,8 +82,8 @@
                             "geometry": {
                                 "type": "Point",
                                 "coordinates": [
-                                  $('#lat').val(),
-                                  $('#lon').val()
+                                  parseFloat($('#lon').val()),
+                                  parseFloat($('#lat').val())
                                 ]
                             },
                             "properties": {
@@ -119,6 +135,61 @@
                     $('#pub_rev').val(data.pub.rev);
                     $('#prv_rev').val(data.prv.rev);
                 } );
+                
+                //show map
+                ymaps.ready(init);
+                
+                function init () {
+                    var myMap = new ymaps.Map('map', {
+                            center: [-8.354994, 115.115268],
+                            zoom: 10
+                        }, {
+                            searchControlProvider: 'yandex#search'
+                        }),
+                        objectManager = new ymaps.ObjectManager({
+                            // Чтобы метки начали кластеризоваться, выставляем опцию.
+                            clusterize: true,
+                            // ObjectManager принимает те же опции, что и кластеризатор.
+                            gridSize: 32,
+                            clusterDisableClickZoom: true
+                        });
+                
+                    // Чтобы задать опции одиночным объектам и кластерам,
+                    // обратимся к дочерним коллекциям ObjectManager.
+                    objectManager.objects.options.set('preset', 'islands#greenDotIcon');
+                    objectManager.clusters.options.set('preset', 'islands#greenClusterIcons');
+                    myMap.geoObjects.add(objectManager);
+                    
+                    
+                    $.ajax({
+                        method: "GET",
+                        url: "https://batas-finkvi.c9users.io/api/pub"
+                    }).done(function(data) {
+                        var r = {
+                            "type": "FeatureCollection",
+                            "features": []
+                        };
+                        
+                        for (var d in data.rows) {
+                            r.features.push ({
+                                "type": "Battery", 
+                                "id": data.rows[d].id, 
+                                "geometry": 
+                                    {"type": "Point", "coordinates": [data.rows[d].value.geometry.coordinates[1], data.rows[d].value.geometry.coordinates[0]]}, 
+                                "properties": {
+                                    "balloonContentHeader": "<font size=3><b>" + data.rows[d].value.properties.product +"</b></font> for " + data.rows[d].value.properties.price + " " + data.rows[d].value.properties.currency, 
+                                    "balloonContentBody": 
+                                    "<p>Status: " + data.rows[d].value.properties.status + "</p><p>" + data.rows[d].value.properties.comments + "</p>", 
+                                    "balloonContentFooter": "<font size=1>Information provided: </font> <strong>Battery AutoShop</strong>", 
+                                    "clusterCaption": "<strong><s>Еще</s> одна</strong> метка", 
+                                    "hintContent": "<strong>Текст  <s>подсказки</s></strong>"
+                                }
+                            });                            
+                        }
+                        objectManager.add(r);
+                    });
+                }
+                
             });
         </script>
     </head>
@@ -206,6 +277,7 @@
                 <input type="button" id="saverecord" name="saverecord" value="Save record">
             </div>
         </div>
+        
         <div id="alldatawrapper">
             <div><h1>All data</h1></div>
             <table id="alldata" class="display" cellspacing="0" width="100%">
@@ -230,5 +302,6 @@
             </thead>
             </table>
         </div>
+        <div id="map"></div>
     </body>
 </html>

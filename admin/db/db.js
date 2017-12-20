@@ -4,12 +4,13 @@ var prv;
 var pubwr;
 var prvwr;
 
-var opts;
+var dbopts;
 
 function getPubData () {
   return new Promise (function (resolve, reject) {
     pub.view('show', 'battery', function(err, body, cb) {
       if (!err) {
+        /*
         var data = [];
         try {
           body.rows.forEach(function(doc) {
@@ -30,6 +31,8 @@ function getPubData () {
         } catch (e) {
             reject ("Error database replay: " + e);
           }
+        */
+        resolve(body);
       }
       else {
         reject ("Cann't get public data: " + err);
@@ -42,6 +45,7 @@ function getPrvData () {
   return new Promise (function (resolve, reject){
     prv.view('show', 'desc', function(err, body, cb) {
       if (!err) {
+        /*
         var data = [];
         try {
           body.rows.forEach(function(doc) {
@@ -68,10 +72,32 @@ function getPrvData () {
         } catch (e) {
             reject ("Error database replay: " + e);
           }
+        */
+        //Transform Links
+        var prvlink = 'https://' + dbopts.batas_private.rkey +'@' + dbopts.url + "/batas_private/";
+         
+        for (var d in body.rows) {
+            var links = '';
+            for (var filename in body.rows[d].value._attachments) {
+                links += 
+                    "<p><a href='" 
+                    + prvlink
+                    +  body.rows[d].id
+                    + "/" 
+                    + filename  
+                    + "'>"
+                    + filename 
+                    + "</a></p>";
+            }
+            body.rows[d].value.links = links;
+        }
+        
+        resolve(body);
       }
       else {
         reject ("Cann't get public data: " + err);
       }
+      
     });
   });
 }
@@ -89,18 +115,21 @@ function getAllData () {
         var pub = r[0];
         var prv = r[1];
         
-        for (var b in pub) {
-          for (var v in prv) {
-            if (pub[b].id == prv[v].id) {
+        for (var b in pub.rows) {
+          for (var v in prv.rows) {
+            if (pub.rows[b].id == prv.rows[v].id) {
               data.push({
-                "pub": pub[b], 
-                "prv": prv[v]
+                "pub": pub.rows[b].value, 
+                "prv": prv.rows[v].value
               });
               break;
             }
           }
         }
-        resolve ({"data": data});
+        
+        resolve ({
+          "data": data
+        });
       }
     )
     .catch(
@@ -197,7 +226,7 @@ function saveBatteryRecord (pubdata, prvdata, files) {
 }
 
 function db (opts) {
-    opts = opts;
+    dbopts = opts;
     
     //Set coonection to Cloudant as reader
     pub = require('nano')('https://' + opts.batas_public.rkey +'@' + opts.url + "/batas_public"); 
