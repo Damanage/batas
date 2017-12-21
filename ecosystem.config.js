@@ -25,22 +25,11 @@ module.exports = {
   deploy : {
     production : {
       user : 'batas',
-      host : 'admin.battery.msk.ru',
+      host : 'battery.msk.ru',
       ref  : 'origin/master',
       repo : 'https://github.com/finkvi/batas.git',
       path : '/home/batas',
-      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env production'
-    },
-    dev : {
-      user : 'batas',
-      host : 'admin.battery.msk.ru',
-      ref  : 'origin/master',
-      repo : 'git@github.com:finkvi/batas.git',
-      path : '/home/batas',
-      'post-deploy' : 'npm install && pm2 reload ecosystem.config.js --env dev',
-      env  : {
-        NODE_ENV: 'dev'
-      }
+      'post-deploy' : 'cd /admin && npm install && pm2 reload ecosystem.config.js --env production'
     }
   }
 };
