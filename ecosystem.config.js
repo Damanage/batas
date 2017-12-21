@@ -7,7 +7,7 @@ module.exports = {
     // Admin application
     {
       name      : 'admin',
-      script    : 'admin/app.js',
+      script    : 'admin/admin.js',
       env: {
         PORT: 4001
       },
