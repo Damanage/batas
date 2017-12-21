@@ -97,7 +97,7 @@ function getPrvData () {
       else {
         reject ("Cann't get public data: " + err);
       }
-      
+        
     });
   });
 }
