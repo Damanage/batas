@@ -1,0 +1,3 @@
+[submodule "adm"]
+	path = adm
+	url = git@github.com:finkvi/batas-admin.git
