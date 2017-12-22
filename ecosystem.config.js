@@ -8,7 +8,6 @@ module.exports = {
     {
       name      : 'admin',
       script    : 'admin/admin.js',
-      cwd       : '/home/batas/current/admin/',   
       env: {
         PORT: 4001
       },

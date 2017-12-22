@@ -31,7 +31,7 @@
                     "processing": true,
                     "ajax": ({
                         method: "GET",
-                        url: "https://admin.battery.msk.ru/api/all",
+                        url: "/api/all",
                         error: function (xhr,status,error) {
                             console.log(error);
                         }
@@ -116,7 +116,7 @@
                     
                     $.ajax({
                         method: "POST",
-                        url: "https://admin.battery.msk.ru/api/upload",
+                        url: "/api/upload",
                         data: data,
                         cache: false,
                         contentType: false,
@@ -163,7 +163,7 @@
                     
                     $.ajax({
                         method: "GET",
-                        url: "https:///admin.battery.msk.ru/api/pub"
+                        url: "/api/pub"
                     }).done(function(data) {
                         var r = {
                             "type": "FeatureCollection",
